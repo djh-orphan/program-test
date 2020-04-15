@@ -18,3 +18,5 @@ class canlenframe:
         self.text = Text(self.frame1, font=('正文', 20))
         self.text.place(x=10, y=50, width=300, height=250)
         self.text.insert(INSERT, month(datetime.now().year, datetime.now().month))
+
+        
