@@ -5,7 +5,7 @@ import cloc_gui
 import time
 import weather
 setfirstweekday(firstweekday=6)
-url_root = "https://www.tianqi.com/worldcity.html"
+url_root = "https://www.tianqi.com/"
 
 class CanlenFrame:
     showyear = datetime.now().year
