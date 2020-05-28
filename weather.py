@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import tkinter as tk
 from tkinter import *
-from cloc_gui import *
+import cloc_gui 
 
 '''url_root = https://www.tianqi.com/'''
 headers = {
@@ -169,8 +169,8 @@ class Weather():
 
     def change(self):
         self.frame.destroy()
-        ClocFrame(self.root)
+        cloc_gui.ClocFrame(self.root)
 
     def change2(self):
         self.frame.destroy()
-        calen_gui.CanlenFrame(self.root)
+        cloc_gui.calen_gui.CanlenFrame(self.root)
