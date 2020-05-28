@@ -2,8 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import tkinter as tk
 from tkinter import *
-import cloc_gui 
-
+import cloc_gui
 '''url_root = https://www.tianqi.com/'''
 headers = {
     'User-Agent': "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3038.30 Safari/537.36 Core/1.70.3741.400 QQBrowser/10.5.3863.400"}
@@ -11,11 +10,11 @@ headers = {
 
 class Weather():
     def __init__(self, url_root, root):
-        r_root1 = requests.get(url_root + 'asia/', headers=headers, timeout=500)
-        r_root2 = requests.get(url_root + 'europe/', headers=headers, timeout=500)
-        r_root3 = requests.get(url_root + 'america/', headers=headers, timeout=500)
-        r_root4 = requests.get(url_root + 'oceania/', headers=headers, timeout=500)
-        r_root5 = requests.get(url_root + 'africa/', headers=headers, timeout=500)
+        r_root1 = requests.get(url_root + 'asia/', headers=headers, timeout=200)
+        r_root2 = requests.get(url_root + 'europe/', headers=headers, timeout=200)
+        r_root3 = requests.get(url_root + 'america/', headers=headers, timeout=200)
+        r_root4 = requests.get(url_root + 'oceania/', headers=headers, timeout=200)
+        r_root5 = requests.get(url_root + 'africa/', headers=headers, timeout=200)
         r_root1.encoding = "UTF-8"
         r_root2.encoding = "UTF-8"
         r_root3.encoding = "UTF-8"
@@ -77,9 +76,15 @@ class Weather():
         self.bt2 = Button(self.frame, text="日历", command=self.change2)
         self.bt2.place(x=500, y=10, height=20, width=40)
         self.a = self.get_all_html()
+        self.aa = self.get_china_html()
+
         self.s = []
+        self.ss = []
+
         for num in range(len(self.a)):
             self.s.append(self.parse_single_html(self.a[num]))
+        for num in range(len(self.aa)):
+            self.ss.append(self.parse_china(self.aa[num]))
 
     def get_all_html(self, ):
         soup1 = BeautifulSoup(self.demo1, 'html.parser')
@@ -102,7 +107,7 @@ class Weather():
         SSS4 = articles4.find("div", class_="inter_continent")
         SSSS4 = SSS4.find("div", class_="continent_list chooseBox clearfix")
         SSSSS4 = SSSS4.find_all("li")
-        soup5 = BeautifulSoup(self.demo1, 'html.parser')
+        soup5 = BeautifulSoup(self.demo5, 'html.parser')
         articles5 = soup5.find("div", class_="inter_weather main")
         SSS5 = articles5.find("div", class_="inter_continent")
         SSSS5 = SSS5.find("div", class_="continent_list chooseBox clearfix")
@@ -120,8 +125,25 @@ class Weather():
             HREF.append("https://www.tianqi.com" + SSSSS5[i].find("a")["href"])
         return HREF
 
+    def get_china_html(self):
+        demo_root = requests.get('https://www.tianqi.com/chinacity.html', headers=headers, timeout=200)
+        demo_root.encoding = 'UTF-8'
+        demo = demo_root.text
+        soup6 = BeautifulSoup(demo, 'html.parser')
+        articles6 = soup6.find('div', class_='citybox')
+        SSSS6 = articles6.find_all('span')
+        SSSSS6 = articles6.find_all('h3')
+        HREF = []
+        for i in range(len(SSSS6)):
+            for ii in range(len(SSSS6[i].find_all('a'))):
+                HREF.append("https://www.tianqi.com" + SSSS6[i].find_all("a")[ii]["href"] + '15/')
+        for i in range(len(SSSSS6)):
+            for ii in range(len(SSSSS6[i].find_all('a'))):
+                HREF.append("https://www.tianqi.com" + SSSSS6[i].find_all("a")[ii]["href"] + '15/')
+        return HREF
+
     def parse_single_html(self, html):
-        r = requests.get(html, headers=headers, timeout=500)
+        r = requests.get(html, headers=headers, timeout=200)
         soup = BeautifulSoup(r.text, 'html.parser')
         articles = soup.find("div", class_="inter_cityweather mgb_ul clearfix")
         place = articles.find_all("li")
@@ -130,6 +152,33 @@ class Weather():
         for i in range(len(place) - 1):
             weather.append(place[i].find("a")["title"])
         return weather
+
+    def parse_china(self, html):
+        xx = []
+        xxx = []
+        xxxx = []
+        xxxxx = []
+        r = requests.get(html, headers=headers, timeout=200)
+        r.encoding = 'UTF-8'
+        soup = BeautifulSoup(r.text, 'html.parser')
+        place = soup.find('div', class_='inleft_place')
+        weather1 = []
+        articles0 = soup.find('div', class_='w1100')
+        if articles0 is not None:
+            articles1 = articles0.find("ul", class_="weaul")
+            if articles1 is not None:
+                articles2 = articles1.find_all("li")
+                for q in range(len(articles2)):
+                    weather1.append(articles2[q].text)
+        if place is not None:
+            placename = place.find_all('a', class_='place_a')
+            for i in range(len(weather1)-1):
+                xx.append(weather1[i].replace('查看天气详情', ' '))
+                xxx.append(xx[i].replace('\n', ''))
+                xxxx.append(xxx[i].replace('\r', ''))
+                xxxxx.append(xxxx[i].replace(' ', ''))
+            xxxxx.insert(0, placename[1].text)
+        return xxxxx
 
     def show_weather(self):
         '''l3 = tk.Label(frame, text=place_name.get()).place(x=100, y=400)'''
@@ -166,7 +215,38 @@ class Weather():
                 self.tex13.insert(END, self.s[i][13])
                 self.tex14.insert(END, self.s[i][14])
                 self.tex15.insert(END, self.s[i][15])
-
+        for ii in range(len(self.ss)):
+            if self.e.get()[0:len(self.e.get())] == self.ss[ii][0][0:len(self.e.get())]:
+                self.tex1.delete(1.0, END)
+                self.tex2.delete(1.0, END)
+                self.tex3.delete(1.0, END)
+                self.tex4.delete(1.0, END)
+                self.tex5.delete(1.0, END)
+                self.tex6.delete(1.0, END)
+                self.tex7.delete(1.0, END)
+                self.tex8.delete(1.0, END)
+                self.tex9.delete(1.0, END)
+                self.tex10.delete(1.0, END)
+                self.tex11.delete(1.0, END)
+                self.tex12.delete(1.0, END)
+                self.tex13.delete(1.0, END)
+                self.tex14.delete(1.0, END)
+                self.tex15.delete(1.0, END)
+                self.tex1.insert(END, self.ss[ii][1])
+                self.tex2.insert(END, self.ss[ii][2])
+                self.tex3.insert(END, self.ss[ii][3])
+                self.tex4.insert(END, self.ss[ii][4])
+                self.tex5.insert(END, self.ss[ii][5])
+                self.tex6.insert(END, self.ss[ii][6])
+                self.tex7.insert(END, self.ss[ii][7])
+                self.tex8.insert(END, self.ss[ii][8])
+                self.tex9.insert(END, self.ss[ii][9])
+                self.tex10.insert(END, self.ss[ii][10])
+                self.tex11.insert(END, self.ss[ii][11])
+                self.tex12.insert(END, self.ss[ii][12])
+                self.tex13.insert(END, self.ss[ii][13])
+                self.tex14.insert(END, self.ss[ii][14])
+                self.tex15.insert(END, self.ss[ii][15])
     def change(self):
         self.frame.destroy()
         cloc_gui.ClocFrame(self.root)
@@ -174,3 +254,5 @@ class Weather():
     def change2(self):
         self.frame.destroy()
         cloc_gui.calen_gui.CanlenFrame(self.root)
+
+
